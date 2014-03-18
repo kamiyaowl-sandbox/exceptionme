@@ -1,53 +1,75 @@
-﻿var ExceptionMeDraw = (function () {
-    function ExceptionMeDraw() {
-    }
-    ExceptionMeDraw.prototype.init = function () {
+﻿var LoopDrawing = (function () {
+    function LoopDrawing(d, w, viewport) {
+        this.d = d;
+        this.w = w;
+        this.viewport = viewport;
         var r = new THREE.WebGLRenderer({ antialias: true });
         if (r) {
-            var width = window.innerWidth;
-            var height = window.innerHeight / 2;
+            var width = w.innerWidth;
+            var height = w.innerHeight / 2;
+
             r.setSize(width, height);
             r.setClearColor(0x000000, 1);
-            document.querySelector("#viewport").appendChild(r.domElement);
+            viewport.appendChild(r.domElement);
 
             var fov = 100;
             var aspect = width / height;
             var cam = new THREE.PerspectiveCamera(fov, aspect);
             cam.position = new THREE.Vector3(0, 0, 1000);
 
-            var scene = new THREE.Scene();
+            d.renderer = r;
+            d.camera = cam;
+            d.width = width;
+            d.height = height;
+            d.init();
 
-            var dirLight = new THREE.DirectionalLight(0xffffff, 1);
-            dirLight.position = new THREE.Vector3(0, 0, 1);
-            scene.add(dirLight);
-
-            var geo = new THREE.CubeGeometry(500, 500, 500);
-            var mat = new THREE.MeshLambertMaterial({ color: 0xffff00 });
-            var cube = new THREE.Mesh(geo, mat);
-            scene.add(cube);
-
-            r.render(scene, cam);
             console.log("init");
-            this.render(r, scene, cam, cube);
         } else {
             console.log("err");
         }
-    };
-    ExceptionMeDraw.prototype.render = function (r, sc, cam, cube) {
+    }
+    LoopDrawing.prototype.draw = function () {
         var _this = this;
-        cube.rotation.x += 0.01;
-        cube.rotation.y += 0.01;
-
-        r.render(sc, cam);
+        this.d.draw();
 
         requestAnimationFrame(function () {
-            return _this.render(r, sc, cam, cube);
+            return _this.draw();
         });
     };
-    return ExceptionMeDraw;
+    return LoopDrawing;
+})();
+
+var CubeDraw = (function () {
+    function CubeDraw() {
+    }
+    CubeDraw.prototype.init = function () {
+        this.scene = new THREE.Scene();
+
+        var dirLight = new THREE.DirectionalLight(0xffffff, 1);
+        dirLight.position = new THREE.Vector3(0, 0, 1);
+        this.scene.add(dirLight);
+
+        var geo = new THREE.CubeGeometry(500, 500, 500);
+        var mat = new THREE.MeshLambertMaterial({ color: 0xffff00 });
+        this.cube = new THREE.Mesh(geo, mat);
+
+        this.scene.add(this.cube);
+
+        this.renderer.render(this.scene, this.camera);
+    };
+    CubeDraw.prototype.draw = function () {
+        this.cube.rotation.x += 0.01;
+        this.cube.rotation.y += 0.01;
+
+        this.renderer.render(this.scene, this.camera);
+    };
+    return CubeDraw;
 })();
 
 window.onload = function () {
-    var d = new ExceptionMeDraw();
-    d.init();
+    var target = document.querySelector("#viewport");
+    var cd = new CubeDraw();
+
+    var ld = new LoopDrawing(cd, window, target);
+    ld.draw();
 };
