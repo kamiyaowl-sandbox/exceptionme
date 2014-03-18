@@ -31,9 +31,22 @@ var ExceptionMeDraw = (function () {
 
             r.render(scene, cam);
             console.log("init");
+            this.render(r, scene, cam, cube);
         } else {
             console.log("err");
         }
+    };
+    ExceptionMeDraw.prototype.render = function (r, sc, cam, cube) {
+        var _this = this;
+        cube.rotation.x += 0.01;
+        cube.rotation.y += 0.01;
+
+        r.render(sc, cam);
+
+        //nearly setInterval
+        requestAnimationFrame(function () {
+            return _this.render(r, sc, cam, cube);
+        });
     };
     return ExceptionMeDraw;
 })();

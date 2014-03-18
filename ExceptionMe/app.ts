@@ -27,9 +27,18 @@ class ExceptionMeDraw {
 
             r.render(scene, cam);
             console.log("init");
+            this.render(r, scene, cam, cube);
         } else {
             console.log("err");
         }
+    }
+    private render(r: THREE.Renderer, sc: THREE.Scene, cam: THREE.Camera, cube: THREE.Mesh) {
+        cube.rotation.x += 0.01;
+        cube.rotation.y += 0.01;
+
+        r.render(sc, cam);
+        //nearly setInterval
+        requestAnimationFrame(() => this.render(r, sc, cam, cube));
     }
 }
 
