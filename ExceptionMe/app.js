@@ -4,10 +4,10 @@
     ExceptionMeDraw.prototype.init = function () {
         var r = new THREE.WebGLRenderer({ antialias: true });
         if (r) {
-            var width = window.innerWidth / 2;
+            var width = window.innerWidth;
             var height = window.innerHeight / 2;
             r.setSize(width, height);
-            r.setClearColorHex(0x4598ef, 1);
+            r.setClearColor(0x000000, 1);
             document.querySelector("#viewport").appendChild(r.domElement);
 
             var fov = 100;
@@ -22,7 +22,7 @@
             scene.add(dirLight);
 
             var geo = new THREE.CubeGeometry(500, 500, 500);
-            var mat = new THREE.MeshLambertMaterial({ color: 0xff0000 });
+            var mat = new THREE.MeshLambertMaterial({ color: 0xffff00 });
             var cube = new THREE.Mesh(geo, mat);
             scene.add(cube);
 
