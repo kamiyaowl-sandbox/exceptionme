@@ -2,6 +2,7 @@
 /// <reference path="scripts/typings/createjs/createjs.d.ts" />
 /// <reference path="scripts/typings/tweenjs/tweenjs.d.ts" />
 /// <reference path="scripts/threemodule.ts" />
+
 interface IDrawable {
     renderer: THREE.Renderer;
     camera: THREE.Camera;
@@ -25,7 +26,7 @@ class LoopDrawing {
             var fov = 100;
             var aspect = width / height;
             var cam = new THREE.PerspectiveCamera(fov, aspect);
-            cam.position = new THREE.Vector3(0, 0, 1000);
+            cam.position = new THREE.Vector3(0, 0, 500);
             //IDrawable init
             d.renderer = r;
             d.camera = cam;
@@ -42,6 +43,41 @@ class LoopDrawing {
         requestAnimationFrame(() => this.draw());
     }
 }
+class PositionManager{
+    circleMoveDiff: number = 0;
+    constructor(public arr: Array<THREE.Mesh>) {
+    }
+    all(f:(m:THREE.Mesh) => void) {
+        for (var i = 0; i < this.arr.length; ++i) {
+            f(this.arr[i]);
+        }
+    }
+    circle(center: THREE.Vector3, r: number, ap: (target:THREE.Mesh, x: number, y: number) => void = null,phi:number = 0) {
+        //default
+        if (!ap) ap = (t, x, y) => {
+            t.position.x = x;
+            t.position.y = y;
+        }
+
+        var count = this.arr.length;
+        for (var i = 0; i < count; ++i) {
+            var rad = 2 * Math.PI * i / count + phi;
+            var x = r * Math.cos(rad) + center.x;
+            var y = r * Math.sin(rad) + center.y;
+
+            ap(this.arr[i], x, y);
+        }
+    }
+    circleStraight(center: THREE.Vector3, r: number, diff: number, ap: (target: THREE.Mesh, x: number, y: number) => void = null) {
+        this.circle(center, r, ap, this.circleMoveDiff);
+        this.circleMoveDiff += diff;
+    }
+    circleMove(center: THREE.Vector3, r: number, time: number, ease:(amount:number) => number = null) {
+        this.circle(new THREE.Vector3(0, 0, 0), r, (t, x, y) => {
+            createjs.Tween.get(t.position).to({ 'x': x, 'y': y }, time,ease);
+        });
+    }
+}
 
 class CubeDraw implements IDrawable {
     renderer: THREE.Renderer;
@@ -49,8 +85,8 @@ class CubeDraw implements IDrawable {
     width: number;
     height: number;
 
+    pm: PositionManager;
     scene: THREE.Scene;
-    cube: THREE.Mesh;
 
     init() {
         //scene init
@@ -60,25 +96,36 @@ class CubeDraw implements IDrawable {
         dirLight.position = new THREE.Vector3(0, 0, 1);
         this.scene.add(dirLight);
         //mesh
-        var geo = new THREE.CubeGeometry(500, 500, 500);
-        var mat = new THREE.MeshLambertMaterial({ color: 0xffff00 });
-        this.cube = new THREE.Mesh(geo, mat);
-
-        this.scene.add(this.cube);
-
-        createjs.Ticker.setFPS(24);
-        createjs.Tween.get(this.cube.position).to({ "x": 1000 }, 5000,createjs.Ease.bounceInOut).call((o) => { console.log(o); });
+        var arr = new Array<THREE.Mesh>();
+        for (var i = 0; i < 10; ++i) {
+            var geo = new THREE.CubeGeometry(100, 100, 100);
+            var mat = new THREE.MeshLambertMaterial({ color: 0xffff00 });
+            var cube = new THREE.Mesh(geo, mat);
+            arr.push(cube);
+            this.scene.add(cube);
+        }
+        this.pm = new PositionManager(arr);
+        this.pm.circleMove(new THREE.Vector3(0, 0, 0), 500, 1000, createjs.Ease.cubicInOut);
+        createjs.Ticker.setFPS(30);
+        //createjs.Tween.get(this.cube.position).to({ "x": 1000 }, 5000,createjs.Ease.bounceInOut).call((o) => { console.log(o); });
 
         this.renderer.render(this.scene, this.camera);
     }
     draw() {
-        this.cube.rotation.x += 0.01;
-        this.cube.rotation.y += 0.01;
+        //this.pm.circleMove(new THREE.Vector3(0, 0, 0), 300, 0.1, (t, x, y) => {
+        //    t.position.x = x;
+        //    t.position.y = y;
+        //});
 
+        this.pm.all((m) => {
+            m.rotation.x += 0.01;
+            m.rotation.y += 0.01;
+        });
+
+        console.log("draw");
         this.renderer.render(this.scene,this.camera);
     }
 }
-
 
 
 window.onload = () => {

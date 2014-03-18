@@ -15,7 +15,7 @@
             var fov = 100;
             var aspect = width / height;
             var cam = new THREE.PerspectiveCamera(fov, aspect);
-            cam.position = new THREE.Vector3(0, 0, 1000);
+            cam.position = new THREE.Vector3(0, 0, 500);
 
             d.renderer = r;
             d.camera = cam;
@@ -36,6 +36,47 @@
     };
     return LoopDrawing;
 })();
+var PositionManager = (function () {
+    function PositionManager(arr) {
+        this.arr = arr;
+        this.circleMoveDiff = 0;
+    }
+    PositionManager.prototype.all = function (f) {
+        for (var i = 0; i < this.arr.length; ++i) {
+            f(this.arr[i]);
+        }
+    };
+    PositionManager.prototype.circle = function (center, r, ap, phi) {
+        if (typeof ap === "undefined") { ap = null; }
+        if (typeof phi === "undefined") { phi = 0; }
+        if (!ap)
+            ap = function (t, x, y) {
+                t.position.x = x;
+                t.position.y = y;
+            };
+
+        var count = this.arr.length;
+        for (var i = 0; i < count; ++i) {
+            var rad = 2 * Math.PI * i / count + phi;
+            var x = r * Math.cos(rad) + center.x;
+            var y = r * Math.sin(rad) + center.y;
+
+            ap(this.arr[i], x, y);
+        }
+    };
+    PositionManager.prototype.circleStraight = function (center, r, diff, ap) {
+        if (typeof ap === "undefined") { ap = null; }
+        this.circle(center, r, ap, this.circleMoveDiff);
+        this.circleMoveDiff += diff;
+    };
+    PositionManager.prototype.circleMove = function (center, r, time, ease) {
+        if (typeof ease === "undefined") { ease = null; }
+        this.circle(new THREE.Vector3(0, 0, 0), r, function (t, x, y) {
+            createjs.Tween.get(t.position).to({ 'x': x, 'y': y }, time, ease);
+        });
+    };
+    return PositionManager;
+})();
 
 var CubeDraw = (function () {
     function CubeDraw() {
@@ -47,23 +88,27 @@ var CubeDraw = (function () {
         dirLight.position = new THREE.Vector3(0, 0, 1);
         this.scene.add(dirLight);
 
-        var geo = new THREE.CubeGeometry(500, 500, 500);
-        var mat = new THREE.MeshLambertMaterial({ color: 0xffff00 });
-        this.cube = new THREE.Mesh(geo, mat);
-
-        this.scene.add(this.cube);
-
-        createjs.Ticker.setFPS(24);
-        createjs.Tween.get(this.cube.position).to({ "x": 1000 }, 5000, createjs.Ease.bounceInOut).call(function (o) {
-            console.log(o);
-        });
+        var arr = new Array();
+        for (var i = 0; i < 10; ++i) {
+            var geo = new THREE.CubeGeometry(100, 100, 100);
+            var mat = new THREE.MeshLambertMaterial({ color: 0xffff00 });
+            var cube = new THREE.Mesh(geo, mat);
+            arr.push(cube);
+            this.scene.add(cube);
+        }
+        this.pm = new PositionManager(arr);
+        this.pm.circleMove(new THREE.Vector3(0, 0, 0), 500, 1000, createjs.Ease.cubicInOut);
+        createjs.Ticker.setFPS(30);
 
         this.renderer.render(this.scene, this.camera);
     };
     CubeDraw.prototype.draw = function () {
-        this.cube.rotation.x += 0.01;
-        this.cube.rotation.y += 0.01;
+        this.pm.all(function (m) {
+            m.rotation.x += 0.01;
+            m.rotation.y += 0.01;
+        });
 
+        console.log("draw");
         this.renderer.render(this.scene, this.camera);
     };
     return CubeDraw;
