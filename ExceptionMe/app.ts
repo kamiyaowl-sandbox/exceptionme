@@ -39,7 +39,6 @@ class LoopDrawing {
     }
     draw() {
         this.d.draw();
-        //nearly setInterval
         requestAnimationFrame(() => this.draw());
     }
 }
@@ -107,7 +106,6 @@ class CubeDraw implements IDrawable {
         this.pm = new PositionManager(arr);
         this.pm.circleMove(new THREE.Vector3(0, 0, 0), 500, 1000, createjs.Ease.cubicInOut);
         createjs.Ticker.setFPS(30);
-        //createjs.Tween.get(this.cube.position).to({ "x": 1000 }, 5000,createjs.Ease.bounceInOut).call((o) => { console.log(o); });
 
         this.renderer.render(this.scene, this.camera);
     }

@@ -29,7 +29,6 @@
     LoopDrawing.prototype.draw = function () {
         var _this = this;
         this.d.draw();
-
         requestAnimationFrame(function () {
             return _this.draw();
         });
