@@ -3,3 +3,4 @@ C:\Users\Fumiya\Data\repos\ExceptionMe\ExceptionMe\bin\ExceptionMe.dll
 C:\Users\Fumiya\Data\repos\ExceptionMe\ExceptionMe\bin\ExceptionMe.pdb
 C:\Users\Fumiya\Data\repos\ExceptionMe\ExceptionMe\obj\Release\ExceptionMe.dll
 C:\Users\Fumiya\Data\repos\ExceptionMe\ExceptionMe\obj\Release\ExceptionMe.pdb
+C:\Users\Fumiya\Data\repos\ExceptionMe\ExceptionMe\obj\Release\ExceptionMe.csprojResolveAssemblyReference.cache

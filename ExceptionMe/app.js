@@ -22,10 +22,8 @@
             d.width = width;
             d.height = height;
             d.init();
-
-            console.log("init");
         } else {
-            console.log("err");
+            console.log("WebGLRenderer init failed.");
         }
     }
     LoopDrawing.prototype.draw = function () {
@@ -54,6 +52,11 @@ var CubeDraw = (function () {
         this.cube = new THREE.Mesh(geo, mat);
 
         this.scene.add(this.cube);
+
+        createjs.Ticker.setFPS(24);
+        createjs.Tween.get(this.cube.position).to({ "x": 1000 }, 5000, createjs.Ease.bounceInOut).call(function (o) {
+            console.log(o);
+        });
 
         this.renderer.render(this.scene, this.camera);
     };
