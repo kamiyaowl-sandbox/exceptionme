@@ -1,0 +1,6 @@
+C:\Users\Fumiya\Data\repos\ExceptionMe\ExceptionMe\bin\ExceptionMe.dll.config
+C:\Users\Fumiya\Data\repos\ExceptionMe\ExceptionMe\bin\ExceptionMe.dll
+C:\Users\Fumiya\Data\repos\ExceptionMe\ExceptionMe\bin\ExceptionMe.pdb
+C:\Users\Fumiya\Data\repos\ExceptionMe\ExceptionMe\obj\Debug\ExceptionMe.csprojResolveAssemblyReference.cache
+C:\Users\Fumiya\Data\repos\ExceptionMe\ExceptionMe\obj\Debug\ExceptionMe.dll
+C:\Users\Fumiya\Data\repos\ExceptionMe\ExceptionMe\obj\Debug\ExceptionMe.pdb

@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>rangoric.three.js</id>
+    <version>0.66.3</version>
+    <title>three.js</title>
+    <authors>mrdoob</authors>
+    <owners>mrdoob</owners>
+    <licenseUrl>https://github.com/mrdoob/three.js/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/Rangoric/three.js</projectUrl>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <description>The aim of the project is to create a lightweight 3D library with a very low level of complexity — in other words, for dummies. The library provides &lt;canvas&gt;, &lt;svg&gt;, CSS3D and WebGL renderers.</description>
+    <summary>JavaScript 3D library</summary>
+    <releaseNotes>https://github.com/mrdoob/three.js/releases</releaseNotes>
+    <copyright>2010-2014 three.js authors</copyright>
+    <language>en-US</language>
+    <tags>threejs javascript webgl</tags>
+  </metadata>
+</package>
