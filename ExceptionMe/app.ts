@@ -4,12 +4,14 @@ class ExceptionMeDraw {
         var r = new THREE.WebGLRenderer({ antialias: true });
         if (r) {
             //html init
-            r.setSize(window.innerWidth, window.innerHeight);
-            r.setClearColorHex(0x000000, 1);
+            var width = window.innerWidth / 2;
+            var height = window.innerHeight / 2;
+            r.setSize(width, height);
+            r.setClearColorHex(0x4598ef, 1);
             document.querySelector("#viewport").appendChild(r.domElement);
             //camera init
             var fov = 100;//画角
-            var aspect = window.innerWidth / window.innerHeight;
+            var aspect = width / height;
             var cam = new THREE.PerspectiveCamera(fov, aspect);
             cam.position = new THREE.Vector3(0, 0, 1000);
             //scene init
