@@ -14,8 +14,9 @@
 
             var fov = 100;
             var aspect = width / height;
-            var cam = new THREE.PerspectiveCamera(fov, aspect);
-            cam.position = new THREE.Vector3(0, 0, 500);
+            var cam = new THREE.OrthographicCamera(-width / 2, width / 2, height / 2, -height / 2, 1, 2000);
+            cam.position = new THREE.Vector3(1000, 500, 1000);
+            cam.lookAt(new THREE.Vector3(0, 0, 0));
 
             d.renderer = r;
             d.camera = cam;
@@ -152,6 +153,40 @@ var MeshMover = (function () {
     };
     return MeshMover;
 })();
+var PositionManager = (function () {
+    function PositionManager() {
+    }
+    PositionManager.all = function (arr, f) {
+        for (var i = 0; i < arr.length; ++i) {
+            f(arr[i], i);
+        }
+    };
+    PositionManager.circle = function (arr, center, r, ap, phi) {
+        if (typeof ap === "undefined") { ap = null; }
+        if (typeof phi === "undefined") { phi = 0; }
+        if (!ap)
+            ap = function (t, x, y) {
+                t.position.x = x;
+                t.position.y = y;
+            };
+
+        var count = arr.length;
+        for (var i = 0; i < count; ++i) {
+            var rad = 2 * Math.PI * i / count + phi;
+            var x = r * Math.cos(rad) + center.x;
+            var y = r * Math.sin(rad) + center.y;
+
+            ap(arr[i], x, y);
+        }
+    };
+    PositionManager.circleMove = function (arr, center, r, time, ease) {
+        if (typeof ease === "undefined") { ease = null; }
+        this.circle(arr, new THREE.Vector3(0, 0, 0), r, function (t, x, y) {
+            createjs.Tween.get(t.position).to({ 'x': x, 'z': y }, time, ease);
+        });
+    };
+    return PositionManager;
+})();
 
 Array.prototype.move = function (n, start, margin, ap) {
     if (typeof ap === "undefined") { ap = null; }
@@ -162,47 +197,10 @@ Array.prototype.moveSmooth = function (n, start, margin, time, ease) {
     return MeshMover.moveSmooth(n, this, start, margin, time, ease);
 };
 
-var PositionManager = (function () {
-    function PositionManager(arr) {
-        this.arr = arr;
-        this.circleMoveDiff = 0;
-    }
-    PositionManager.prototype.all = function (f) {
-        for (var i = 0; i < this.arr.length; ++i) {
-            f(this.arr[i], i);
-        }
-    };
-    PositionManager.prototype.circle = function (center, r, ap, phi) {
-        if (typeof ap === "undefined") { ap = null; }
-        if (typeof phi === "undefined") { phi = 0; }
-        if (!ap)
-            ap = function (t, x, y) {
-                t.position.x = x;
-                t.position.y = y;
-            };
-
-        var count = this.arr.length;
-        for (var i = 0; i < count; ++i) {
-            var rad = 2 * Math.PI * i / count + phi;
-            var x = r * Math.cos(rad) + center.x;
-            var y = r * Math.sin(rad) + center.y;
-
-            ap(this.arr[i], x, y);
-        }
-    };
-    PositionManager.prototype.circleStraight = function (center, r, diff, ap) {
-        if (typeof ap === "undefined") { ap = null; }
-        this.circle(center, r, ap, this.circleMoveDiff);
-        this.circleMoveDiff += diff;
-    };
-    PositionManager.prototype.circleMove = function (center, r, time, ease) {
-        if (typeof ease === "undefined") { ease = null; }
-        this.circle(new THREE.Vector3(0, 0, 0), r, function (t, x, y) {
-            createjs.Tween.get(t.position).to({ 'x': x, 'y': y }, time, ease);
-        });
-    };
-    return PositionManager;
-})();
+Array.prototype.circleMove = function circleMove(center, r, time, ease) {
+    if (typeof ease === "undefined") { ease = null; }
+    PositionManager.circleMove(this, center, r, time, ease);
+};
 
 var CubeDraw = (function () {
     function CubeDraw() {
@@ -222,10 +220,9 @@ var CubeDraw = (function () {
             arr.push(cube);
             this.scene.add(cube);
         }
-        this.pm = new PositionManager(arr);
-
-        var f = arr.moveSmooth(1, new THREE.Vector3(-500, 0, 0), 100, 1000, createjs.Ease.cubicInOut).moveSmooth(2, new THREE.Vector3(0, 0, 0), 100, 1000, createjs.Ease.cubicInOut).moveSmooth(3, new THREE.Vector3(500, 0, 0), 100, 1000, createjs.Ease.cubicInOut).moveSmooth(4, new THREE.Vector3(1000, 0, 0), 100, 1000, createjs.Ease.cubicInOut);
         createjs.Ticker.setFPS(30);
+
+        arr.moveSmooth(1, new THREE.Vector3(-500, 0, 0), 100, 1000, createjs.Ease.cubicInOut).moveSmooth(2, new THREE.Vector3(0, 0, 0), 100, 1000, createjs.Ease.cubicInOut).moveSmooth(3, new THREE.Vector3(500, 0, 0), 100, 1000, createjs.Ease.cubicInOut).moveSmooth(4, new THREE.Vector3(1000, 0, 0), 100, 1000, createjs.Ease.cubicInOut).circleMove(new THREE.Vector3(0, 0, 0), 500, 1000, createjs.Ease.cubicInOut);
 
         this.renderer.render(this.scene, this.camera);
     };
