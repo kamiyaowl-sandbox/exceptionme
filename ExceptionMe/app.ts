@@ -188,12 +188,17 @@ class PositionManager{
 }
 //extension methods
 interface Array<T> {
+    shuffle();
+
     move(n: any, start: THREE.Vector3, margin: number, ap: (i: number, t: THREE.Mesh, x: number, y: number) => void);
     moveSmooth(n: any, start: THREE.Vector3, margin: number, time: number, ease: (amount: number) => number);
 
     circleMove(center: THREE.Vector3, r: number, time: number, ease: (amount: number) => number);
 
 }
+Array.prototype.shuffle = function(){
+    return this.sort(() => Math.random() - 0.5);
+};
 Array.prototype.move = function(n: any, start: THREE.Vector3, margin: number, ap: (i: number, t: THREE.Mesh, x: number, y: number, z:number) => void = null) {
     return MeshMover.move(n, this, start, margin, ap);
 }
@@ -261,7 +266,7 @@ class CubeDraw implements IDrawable {
         var ml = date.getMinutes() % 10 << 0;
         var sh = date.getSeconds() / 10 << 0;
         var sl = date.getSeconds() % 10 << 0;
-        this.arr
+        ((sl == 0) ? this.arr.shuffle() : this.arr)
             .moveSmooth(hh,  new THREE.Vector3(-4 * this.space, - this.basePos, 0), this.margin, this.time, createjs.Ease.cubicInOut)
             .moveSmooth(hl,  new THREE.Vector3(-3 * this.space, - this.basePos, 0), this.margin, this.time, createjs.Ease.cubicInOut)
             .moveSmooth(':', new THREE.Vector3(-2 * this.space, - this.basePos, 0), this.margin, this.time, createjs.Ease.cubicInOut)

@@ -191,6 +191,11 @@ var PositionManager = (function () {
     return PositionManager;
 })();
 
+Array.prototype.shuffle = function () {
+    return this.sort(function () {
+        return Math.random() - 0.5;
+    });
+};
 Array.prototype.move = function (n, start, margin, ap) {
     if (typeof ap === "undefined") { ap = null; }
     return MeshMover.move(n, this, start, margin, ap);
@@ -216,7 +221,7 @@ var CubeDraw = (function () {
             var ml = date.getMinutes() % 10 << 0;
             var sh = date.getSeconds() / 10 << 0;
             var sl = date.getSeconds() % 10 << 0;
-            _this.arr.moveSmooth(hh, new THREE.Vector3(-4 * _this.space, -_this.basePos, 0), _this.margin, _this.time, createjs.Ease.cubicInOut).moveSmooth(hl, new THREE.Vector3(-3 * _this.space, -_this.basePos, 0), _this.margin, _this.time, createjs.Ease.cubicInOut).moveSmooth(':', new THREE.Vector3(-2 * _this.space, -_this.basePos, 0), _this.margin, _this.time, createjs.Ease.cubicInOut).moveSmooth(mh, new THREE.Vector3(-_this.space, -_this.basePos, 0), _this.margin, _this.time, createjs.Ease.cubicInOut).moveSmooth(ml, new THREE.Vector3(0, -_this.basePos, 0), _this.margin, _this.time, createjs.Ease.cubicInOut).moveSmooth(':', new THREE.Vector3(_this.space, -_this.basePos, 0), _this.margin, _this.time, createjs.Ease.cubicInOut).moveSmooth(sh, new THREE.Vector3(2 * _this.space, -_this.basePos, 0), _this.margin, _this.time, createjs.Ease.cubicInOut).moveSmooth(sl, new THREE.Vector3(3 * _this.space, -_this.basePos, 0), _this.margin, _this.time, createjs.Ease.cubicInOut).circleMove(new THREE.Vector3(_this.basePos, 0, 0), 4 * _this.space, 1000, createjs.Ease.cubicInOut);
+            ((sl == 0) ? _this.arr.shuffle() : _this.arr).moveSmooth(hh, new THREE.Vector3(-4 * _this.space, -_this.basePos, 0), _this.margin, _this.time, createjs.Ease.cubicInOut).moveSmooth(hl, new THREE.Vector3(-3 * _this.space, -_this.basePos, 0), _this.margin, _this.time, createjs.Ease.cubicInOut).moveSmooth(':', new THREE.Vector3(-2 * _this.space, -_this.basePos, 0), _this.margin, _this.time, createjs.Ease.cubicInOut).moveSmooth(mh, new THREE.Vector3(-_this.space, -_this.basePos, 0), _this.margin, _this.time, createjs.Ease.cubicInOut).moveSmooth(ml, new THREE.Vector3(0, -_this.basePos, 0), _this.margin, _this.time, createjs.Ease.cubicInOut).moveSmooth(':', new THREE.Vector3(_this.space, -_this.basePos, 0), _this.margin, _this.time, createjs.Ease.cubicInOut).moveSmooth(sh, new THREE.Vector3(2 * _this.space, -_this.basePos, 0), _this.margin, _this.time, createjs.Ease.cubicInOut).moveSmooth(sl, new THREE.Vector3(3 * _this.space, -_this.basePos, 0), _this.margin, _this.time, createjs.Ease.cubicInOut).circleMove(new THREE.Vector3(_this.basePos, 0, 0), 4 * _this.space, 1000, createjs.Ease.cubicInOut);
 
             setTimeout(_this.animation, _this.time);
         };
