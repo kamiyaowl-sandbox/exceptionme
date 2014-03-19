@@ -6,7 +6,7 @@
         var r = new THREE.WebGLRenderer({ antialias: true });
         if (r) {
             var width = w.innerWidth;
-            var height = w.innerHeight / 2;
+            var height = w.innerHeight * 0.9;
 
             r.setSize(width, height);
             r.setClearColor(0x000000, 1);
@@ -14,8 +14,8 @@
 
             var fov = 100;
             var aspect = width / height;
-            var cam = new THREE.OrthographicCamera(-width / 2, width / 2, height / 2, -height / 2, 1, 2000);
-            cam.position = new THREE.Vector3(1000, 500, 1000);
+            var cam = new THREE.OrthographicCamera(-width / 2, width / 2, height / 2, -height / 2, 10, 1500);
+            cam.position = new THREE.Vector3(200, 200, 800);
             cam.lookAt(new THREE.Vector3(0, 0, 0));
 
             d.renderer = r;
@@ -122,9 +122,10 @@ var MeshMover = (function () {
     MeshMover.move = function (n, arr, start, margin, ap) {
         if (typeof ap === "undefined") { ap = null; }
         if (!ap)
-            ap = function (i, t, x, y) {
+            ap = function (i, t, x, y, z) {
                 t.position.x = x;
                 t.position.y = y;
+                t.position.z = z;
             };
 
         if (!this.pattern)
@@ -136,10 +137,11 @@ var MeshMover = (function () {
                 if (target[targetCnt]) {
                     var x = start.x + (targetCnt % 5) * margin;
                     var y = start.y - (targetCnt / 5 << 0) * margin;
+                    var z = start.z;
                     if (!arr[targetCnt])
                         break;
-                    console.log(arr.length, targetCnt, arr[targetCnt], x, y);
-                    ap(targetCnt, arr[srcCnt], x, y);
+                    console.log(arr.length, targetCnt, arr[targetCnt], x, y, z);
+                    ap(targetCnt, arr[srcCnt], x, y, z);
                     ++srcCnt;
                 }
             }
@@ -147,8 +149,8 @@ var MeshMover = (function () {
         return arr.slice(srcCnt);
     };
     MeshMover.moveSmooth = function (n, arr, start, margin, time, ease) {
-        return this.move(n, arr, start, margin, function (i, t, x, y) {
-            createjs.Tween.get(t.position).to({ 'x': x, 'y': y }, time, ease);
+        return this.move(n, arr, start, margin, function (i, t, x, y, z) {
+            createjs.Tween.get(t.position).to({ 'x': x, 'y': y, 'z': z }, time, ease);
         });
     };
     return MeshMover;
@@ -165,9 +167,10 @@ var PositionManager = (function () {
         if (typeof ap === "undefined") { ap = null; }
         if (typeof phi === "undefined") { phi = 0; }
         if (!ap)
-            ap = function (t, x, y) {
+            ap = function (t, x, y, z) {
                 t.position.x = x;
                 t.position.y = y;
+                t.position.z = z;
             };
 
         var count = arr.length;
@@ -175,14 +178,14 @@ var PositionManager = (function () {
             var rad = 2 * Math.PI * i / count + phi;
             var x = r * Math.cos(rad) + center.x;
             var y = r * Math.sin(rad) + center.y;
-
-            ap(arr[i], x, y);
+            var z = center.z;
+            ap(arr[i], x, y, z);
         }
     };
     PositionManager.circleMove = function (arr, center, r, time, ease) {
         if (typeof ease === "undefined") { ease = null; }
-        this.circle(arr, new THREE.Vector3(0, 0, 0), r, function (t, x, y) {
-            createjs.Tween.get(t.position).to({ 'x': x, 'z': y }, time, ease);
+        this.circle(arr, new THREE.Vector3(0, 0, 0), r, function (t, x, y, z) {
+            createjs.Tween.get(t.position).to({ 'x': x, 'z': y, 'y': z }, time, ease);
         });
     };
     return PositionManager;
@@ -204,6 +207,19 @@ Array.prototype.circleMove = function circleMove(center, r, time, ease) {
 
 var CubeDraw = (function () {
     function CubeDraw() {
+        var _this = this;
+        this.animation = function () {
+            var date = new Date();
+            var hh = date.getHours() / 10 << 0;
+            var hl = date.getHours() % 10 << 0;
+            var mh = date.getMinutes() / 10 << 0;
+            var ml = date.getMinutes() % 10 << 0;
+            var sh = date.getSeconds() / 10 << 0;
+            var sl = date.getSeconds() % 10 << 0;
+            _this.arr.moveSmooth(hh, new THREE.Vector3(-4 * _this.space, -_this.basePos, 0), _this.margin, _this.time, createjs.Ease.cubicInOut).moveSmooth(hl, new THREE.Vector3(-3 * _this.space, -_this.basePos, 0), _this.margin, _this.time, createjs.Ease.cubicInOut).moveSmooth(':', new THREE.Vector3(-2 * _this.space, -_this.basePos, 0), _this.margin, _this.time, createjs.Ease.cubicInOut).moveSmooth(mh, new THREE.Vector3(-_this.space, -_this.basePos, 0), _this.margin, _this.time, createjs.Ease.cubicInOut).moveSmooth(ml, new THREE.Vector3(0, -_this.basePos, 0), _this.margin, _this.time, createjs.Ease.cubicInOut).moveSmooth(':', new THREE.Vector3(_this.space, -_this.basePos, 0), _this.margin, _this.time, createjs.Ease.cubicInOut).moveSmooth(sh, new THREE.Vector3(2 * _this.space, -_this.basePos, 0), _this.margin, _this.time, createjs.Ease.cubicInOut).moveSmooth(sl, new THREE.Vector3(3 * _this.space, -_this.basePos, 0), _this.margin, _this.time, createjs.Ease.cubicInOut).circleMove(new THREE.Vector3(_this.basePos, 0, 0), 4 * _this.space, 1000, createjs.Ease.cubicInOut);
+
+            setTimeout(_this.animation, _this.time);
+        };
     }
     CubeDraw.prototype.init = function () {
         this.scene = new THREE.Scene();
@@ -212,17 +228,23 @@ var CubeDraw = (function () {
         dirLight.position = new THREE.Vector3(0, 0, 1);
         this.scene.add(dirLight);
 
-        var arr = new Array();
-        for (var i = 0; i < 100; ++i) {
-            var geo = new THREE.CubeGeometry(100, 100, 100);
+        var objectCount = 25 * 8;
+        var size = 30;
+        this.arr = new Array();
+        for (var i = 0; i < objectCount; ++i) {
+            var geo = new THREE.CubeGeometry(size, size, size);
             var mat = new THREE.MeshLambertMaterial({ color: 0xffff00 });
             var cube = new THREE.Mesh(geo, mat);
-            arr.push(cube);
+            this.arr.push(cube);
             this.scene.add(cube);
         }
         createjs.Ticker.setFPS(30);
 
-        arr.moveSmooth(1, new THREE.Vector3(-500, 0, 0), 100, 1000, createjs.Ease.cubicInOut).moveSmooth(2, new THREE.Vector3(0, 0, 0), 100, 1000, createjs.Ease.cubicInOut).moveSmooth(3, new THREE.Vector3(500, 0, 0), 100, 1000, createjs.Ease.cubicInOut).moveSmooth(4, new THREE.Vector3(1000, 0, 0), 100, 1000, createjs.Ease.cubicInOut).circleMove(new THREE.Vector3(0, 0, 0), 500, 1000, createjs.Ease.cubicInOut);
+        this.margin = size * 1.1;
+        this.time = 1000;
+        this.space = this.margin * 5;
+        this.basePos = -this.space / 2;
+        this.animation();
 
         this.renderer.render(this.scene, this.camera);
     };
