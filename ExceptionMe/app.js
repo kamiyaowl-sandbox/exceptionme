@@ -6,7 +6,7 @@
         var r = new THREE.WebGLRenderer({ antialias: true });
         if (r) {
             var width = w.innerWidth;
-            var height = w.innerHeight * 0.9;
+            var height = w.innerHeight;
 
             r.setSize(width, height);
             r.setClearColor(0x000000, 1);
@@ -23,6 +23,8 @@
             d.width = width;
             d.height = height;
             d.init();
+
+            console.log("汚いコードで申し訳ありませんでした。TypeScriptで書きました。");
         } else {
             console.log("WebGLRenderer init failed.");
         }
@@ -140,7 +142,6 @@ var MeshMover = (function () {
                     var z = start.z;
                     if (!arr[targetCnt])
                         break;
-                    console.log(arr.length, targetCnt, arr[targetCnt], x, y, z);
                     ap(targetCnt, arr[srcCnt], x, y, z);
                     ++srcCnt;
                 }
@@ -210,8 +211,8 @@ Array.prototype.circleMove = function circleMove(center, r, time, ease) {
     PositionManager.circleMove(this, center, r, time, ease);
 };
 
-var CubeDraw = (function () {
-    function CubeDraw() {
+var CubeClockDraw = (function () {
+    function CubeClockDraw() {
         var _this = this;
         this.animation = function () {
             var date = new Date();
@@ -226,7 +227,7 @@ var CubeDraw = (function () {
             setTimeout(_this.animation, _this.time);
         };
     }
-    CubeDraw.prototype.init = function () {
+    CubeClockDraw.prototype.init = function () {
         this.scene = new THREE.Scene();
 
         var dirLight = new THREE.DirectionalLight(0xffffff, 1);
@@ -253,16 +254,15 @@ var CubeDraw = (function () {
 
         this.renderer.render(this.scene, this.camera);
     };
-    CubeDraw.prototype.draw = function () {
-        console.log("draw");
+    CubeClockDraw.prototype.draw = function () {
         this.renderer.render(this.scene, this.camera);
     };
-    return CubeDraw;
+    return CubeClockDraw;
 })();
 
 window.onload = function () {
     var target = document.querySelector("#viewport");
-    var cd = new CubeDraw();
+    var cd = new CubeClockDraw();
 
     var ld = new LoopDrawing(cd, window, target);
     ld.draw();

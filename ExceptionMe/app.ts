@@ -17,7 +17,7 @@ class LoopDrawing {
         if (r) {
             //element init
             var width = w.innerWidth;
-            var height = w.innerHeight * 0.9;
+            var height = w.innerHeight;
             //renderer init
             r.setSize(width, height);
             r.setClearColor(0x000000, 1);
@@ -34,6 +34,8 @@ class LoopDrawing {
             d.width = width;
             d.height = height;
             d.init();
+
+            console.log("汚いコードで申し訳ありませんでした。TypeScriptで書きました。");
         } else {
             console.log("WebGLRenderer init failed.");
         }
@@ -143,7 +145,6 @@ class MeshMover {
                     var y = start.y - (targetCnt / 5 << 0) * margin;
                     var z = start.z;
                     if (!arr[targetCnt]) break;
-                    console.log(arr.length,targetCnt, arr[targetCnt], x, y, z);
                     ap(targetCnt, arr[srcCnt], x, y, z);
                     ++srcCnt;
                 }
@@ -211,7 +212,7 @@ Array.prototype.circleMove = function circleMove(center: THREE.Vector3, r: numbe
 }
 
 
-class CubeDraw implements IDrawable {
+class CubeClockDraw implements IDrawable {
     renderer: THREE.Renderer;
     camera: THREE.Camera;
     width: number;
@@ -255,7 +256,6 @@ class CubeDraw implements IDrawable {
         this.renderer.render(this.scene, this.camera);
     }
     draw() {
-        console.log("draw");
         this.renderer.render(this.scene,this.camera);
     }
     animation = () => {
@@ -284,7 +284,7 @@ class CubeDraw implements IDrawable {
 
 window.onload = () => {
     var target = document.querySelector("#viewport");
-    var cd = new CubeDraw();
+    var cd = new CubeClockDraw();
 
     var ld = new LoopDrawing(cd, window, target);
     ld.draw();
