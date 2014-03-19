@@ -35,6 +35,133 @@
     };
     return LoopDrawing;
 })();
+var MeshMover = (function () {
+    function MeshMover() {
+    }
+    MeshMover.init = function () {
+        this.pattern = new Array();
+        this.pattern[0] = [
+            false, true, true, true, false,
+            false, true, false, true, false,
+            false, true, false, true, false,
+            false, true, false, true, false,
+            false, true, true, true, false
+        ];
+        this.pattern[1] = [
+            false, true, true, false, false,
+            false, false, true, false, false,
+            false, false, true, false, false,
+            false, false, true, false, false,
+            false, true, true, true, false
+        ];
+        this.pattern[2] = [
+            false, true, true, true, false,
+            false, false, false, true, false,
+            false, true, true, true, false,
+            false, true, false, false, false,
+            false, true, true, true, false
+        ];
+        this.pattern[3] = [
+            false, true, true, true, false,
+            false, false, false, true, false,
+            false, true, true, true, false,
+            false, false, false, true, false,
+            false, true, true, true, false
+        ];
+        this.pattern[4] = [
+            false, true, false, true, false,
+            false, true, false, true, false,
+            false, true, false, true, false,
+            false, true, true, true, true,
+            false, false, false, true, false
+        ];
+        this.pattern[5] = [
+            false, true, true, true, false,
+            false, true, false, false, false,
+            false, true, true, true, false,
+            false, false, false, true, false,
+            false, true, true, true, false
+        ];
+        this.pattern[6] = [
+            false, true, true, true, false,
+            false, true, false, false, false,
+            false, true, true, true, false,
+            false, true, false, true, false,
+            false, true, true, true, false
+        ];
+        this.pattern[7] = [
+            false, true, true, true, false,
+            false, false, false, true, false,
+            false, false, false, true, false,
+            false, false, false, true, false,
+            false, false, false, true, false
+        ];
+        this.pattern[8] = [
+            false, true, true, true, false,
+            false, true, false, true, false,
+            false, true, true, true, false,
+            false, true, false, true, false,
+            false, true, true, true, false
+        ];
+        this.pattern[9] = [
+            false, true, true, true, false,
+            false, true, false, true, false,
+            false, true, true, true, false,
+            false, false, false, true, false,
+            false, true, true, true, false
+        ];
+        this.pattern[':'] = [
+            false, false, false, false, false,
+            false, false, true, false, false,
+            false, false, false, false, false,
+            false, false, true, false, false,
+            false, false, false, false, false
+        ];
+    };
+    MeshMover.move = function (n, arr, start, margin, ap) {
+        if (typeof ap === "undefined") { ap = null; }
+        if (!ap)
+            ap = function (i, t, x, y) {
+                t.position.x = x;
+                t.position.y = y;
+            };
+
+        if (!this.pattern)
+            this.init();
+        var srcCnt = 0;
+        var target = this.pattern[n];
+        if (target) {
+            for (var targetCnt = 0; targetCnt < 25; ++targetCnt) {
+                if (target[targetCnt]) {
+                    var x = start.x + (targetCnt % 5) * margin;
+                    var y = start.y - (targetCnt / 5 << 0) * margin;
+                    if (!arr[targetCnt])
+                        break;
+                    console.log(arr.length, targetCnt, arr[targetCnt], x, y);
+                    ap(targetCnt, arr[srcCnt], x, y);
+                    ++srcCnt;
+                }
+            }
+        }
+        return arr.slice(srcCnt);
+    };
+    MeshMover.moveSmooth = function (n, arr, start, margin, time, ease) {
+        return this.move(n, arr, start, margin, function (i, t, x, y) {
+            createjs.Tween.get(t.position).to({ 'x': x, 'y': y }, time, ease);
+        });
+    };
+    return MeshMover;
+})();
+
+Array.prototype.move = function (n, start, margin, ap) {
+    if (typeof ap === "undefined") { ap = null; }
+    return MeshMover.move(n, this, start, margin, ap);
+};
+Array.prototype.moveSmooth = function (n, start, margin, time, ease) {
+    if (typeof ease === "undefined") { ease = null; }
+    return MeshMover.moveSmooth(n, this, start, margin, time, ease);
+};
+
 var PositionManager = (function () {
     function PositionManager(arr) {
         this.arr = arr;
@@ -42,7 +169,7 @@ var PositionManager = (function () {
     }
     PositionManager.prototype.all = function (f) {
         for (var i = 0; i < this.arr.length; ++i) {
-            f(this.arr[i]);
+            f(this.arr[i], i);
         }
     };
     PositionManager.prototype.circle = function (center, r, ap, phi) {
@@ -88,7 +215,7 @@ var CubeDraw = (function () {
         this.scene.add(dirLight);
 
         var arr = new Array();
-        for (var i = 0; i < 10; ++i) {
+        for (var i = 0; i < 100; ++i) {
             var geo = new THREE.CubeGeometry(100, 100, 100);
             var mat = new THREE.MeshLambertMaterial({ color: 0xffff00 });
             var cube = new THREE.Mesh(geo, mat);
@@ -96,17 +223,13 @@ var CubeDraw = (function () {
             this.scene.add(cube);
         }
         this.pm = new PositionManager(arr);
-        this.pm.circleMove(new THREE.Vector3(0, 0, 0), 500, 1000, createjs.Ease.cubicInOut);
+
+        var f = arr.moveSmooth(1, new THREE.Vector3(-500, 0, 0), 100, 1000, createjs.Ease.cubicInOut).moveSmooth(2, new THREE.Vector3(0, 0, 0), 100, 1000, createjs.Ease.cubicInOut).moveSmooth(3, new THREE.Vector3(500, 0, 0), 100, 1000, createjs.Ease.cubicInOut).moveSmooth(4, new THREE.Vector3(1000, 0, 0), 100, 1000, createjs.Ease.cubicInOut);
         createjs.Ticker.setFPS(30);
 
         this.renderer.render(this.scene, this.camera);
     };
     CubeDraw.prototype.draw = function () {
-        this.pm.all(function (m) {
-            m.rotation.x += 0.01;
-            m.rotation.y += 0.01;
-        });
-
         console.log("draw");
         this.renderer.render(this.scene, this.camera);
     };
