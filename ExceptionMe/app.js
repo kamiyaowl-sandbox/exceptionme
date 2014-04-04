@@ -3,28 +3,27 @@
         this.d = d;
         this.w = w;
         this.viewport = viewport;
-        var r = new THREE.WebGLRenderer({ antialias: true });
-        if (r) {
+        this.renderer = new THREE.WebGLRenderer({ antialias: true });
+        if (this.renderer) {
             var width = w.innerWidth;
             var height = w.innerHeight;
 
-            r.setSize(width, height);
-            r.setClearColor(0x000000, 1);
-            viewport.appendChild(r.domElement);
+            this.renderer.setSize(width, height);
+            this.renderer.setClearColor(0x000000, 1);
+            viewport.appendChild(this.renderer.domElement);
 
-            var fov = 100;
-            var aspect = width / height;
-            var cam = new THREE.OrthographicCamera(-width / 2, width / 2, height / 2, -height / 2, 10, 1500);
+            var cam = new THREE.OrthographicCamera(-width / 2, width / 2, height / 2, -height / 2, 1, 1500);
             cam.position = new THREE.Vector3(200, 200, 800);
-            cam.lookAt(new THREE.Vector3(0, 0, 0));
+            cam.lookAt(new THREE.Vector3(50, 0, 0));
 
-            d.renderer = r;
+            d.renderer = this.renderer;
             d.camera = cam;
             d.width = width;
             d.height = height;
             d.init();
 
-            console.log("汚いコードで申し訳ありませんでした。TypeScriptで書きました。");
+            for (var i = 0; i < 100; ++i)
+                console.log(":(");
         } else {
             console.log("WebGLRenderer init failed.");
         }
@@ -35,6 +34,9 @@
         requestAnimationFrame(function () {
             return _this.draw();
         });
+    };
+    LoopDrawing.prototype.click = function () {
+        this.d.click();
     };
     return LoopDrawing;
 })();
@@ -231,15 +233,16 @@ var CubeClockDraw = (function () {
         this.scene = new THREE.Scene();
 
         var dirLight = new THREE.DirectionalLight(0xffffff, 1);
-        dirLight.position = new THREE.Vector3(0, 0, 1);
+        dirLight.position = new THREE.Vector3(0, 0, this.camera.position.z);
         this.scene.add(dirLight);
 
         var objectCount = 25 * 8;
         var size = 30;
         this.arr = new Array();
+        this.rmArr = new Array();
         for (var i = 0; i < objectCount; ++i) {
             var geo = new THREE.CubeGeometry(size, size, size);
-            var mat = new THREE.MeshLambertMaterial({ color: 0xffff00 });
+            var mat = new THREE.MeshPhongMaterial({ color: 0xffff00 });
             var cube = new THREE.Mesh(geo, mat);
             this.arr.push(cube);
             this.scene.add(cube);
@@ -257,6 +260,21 @@ var CubeClockDraw = (function () {
     CubeClockDraw.prototype.draw = function () {
         this.renderer.render(this.scene, this.camera);
     };
+
+    CubeClockDraw.prototype.remove = function () {
+        if (this.arr.length == 0) {
+            this.arr = this.rmArr;
+            this.rmArr = new Array();
+        } else {
+            var remove = this.arr.pop();
+            this.rmArr.push(remove);
+            var area = 1000;
+            createjs.Tween.get(remove.position).wait(300).to({ 'x': Math.random() * area - area / 2, 'y': Math.random() * area - area / 2, 'z': Math.random() * area - area / 2 }, 5000, createjs.Ease.cubicInOut);
+        }
+    };
+    CubeClockDraw.prototype.click = function () {
+        this.remove();
+    };
     return CubeClockDraw;
 })();
 
@@ -266,4 +284,8 @@ window.onload = function () {
 
     var ld = new LoopDrawing(cd, window, target);
     ld.draw();
+
+    window.onclick = function () {
+        return ld.click();
+    };
 };

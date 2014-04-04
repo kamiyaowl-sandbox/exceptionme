@@ -10,32 +10,33 @@ interface IDrawable {
     height: number;
     init: () => void;
     draw: () => void;
+    click: () => void;
 }
 class LoopDrawing {
+    renderer;
     constructor(private d: IDrawable, private w: Window, private viewport: Element) {
-        var r = new THREE.WebGLRenderer({ antialias: true });
-        if (r) {
+        this.renderer = new THREE.WebGLRenderer({ antialias: true });
+        if (this.renderer) {
             //element init
             var width = w.innerWidth;
             var height = w.innerHeight;
             //renderer init
-            r.setSize(width, height);
-            r.setClearColor(0x000000, 1);
-            viewport.appendChild(r.domElement);
+            this.renderer.setSize(width, height);
+            this.renderer.setClearColor(0x000000, 1);
+            viewport.appendChild(this.renderer.domElement);
             //camera init
-            var fov = 100;
-            var aspect = width / height;
-            var cam = new THREE.OrthographicCamera(- width / 2, width / 2, height / 2, - height / 2, 10, 1500);
+            //var cam = new THREE.PerspectiveCamera(60, width / height, 1, 10000);
+            var cam = new THREE.OrthographicCamera(- width / 2, width / 2, height / 2, - height / 2, 1, 1500);
             cam.position = new THREE.Vector3(200, 200, 800);
-            cam.lookAt(new THREE.Vector3(0, 0, 0));
+            cam.lookAt(new THREE.Vector3(50, 0, 0));
             //IDrawable init
-            d.renderer = r;
+            d.renderer = this.renderer;
             d.camera = cam;
             d.width = width;
             d.height = height;
             d.init();
 
-            console.log("汚いコードで申し訳ありませんでした。TypeScriptで書きました。");
+            for (var i = 0; i < 100; ++ i) console.log(":(");
         } else {
             console.log("WebGLRenderer init failed.");
         }
@@ -43,6 +44,9 @@ class LoopDrawing {
     draw() {
         this.d.draw();
         requestAnimationFrame(() => this.draw());
+    }
+    click() {
+        this.d.click();
     }
 }
 class MeshMover {
@@ -221,6 +225,7 @@ class CubeClockDraw implements IDrawable {
     scene: THREE.Scene;
 
     arr: Array<THREE.Mesh>;
+    rmArr: Array<THREE.Mesh>;
     margin: number;
     time: number;
     space: number;
@@ -231,16 +236,17 @@ class CubeClockDraw implements IDrawable {
         //scene init
         this.scene = new THREE.Scene();
 
-        var dirLight = new THREE.DirectionalLight(0xffffff, 1);
-        dirLight.position = new THREE.Vector3(0, 0, 1);
+        var dirLight = new THREE.DirectionalLight(0xffffff,1);
+        dirLight.position = new THREE.Vector3(0,0, this.camera.position.z);
         this.scene.add(dirLight);
         //mesh
         var objectCount = 25 * 8;
         var size = 30;
         this.arr = new Array<THREE.Mesh>();
+        this.rmArr = new Array<THREE.Mesh>();
         for (var i = 0; i < objectCount; ++i) {
             var geo = new THREE.CubeGeometry(size, size, size);
-            var mat = new THREE.MeshLambertMaterial({ color: 0xffff00 });
+            var mat = new THREE.MeshPhongMaterial({ color: 0xffff00});
             var cube = new THREE.Mesh(geo, mat);
             this.arr.push(cube);
             this.scene.add(cube);
@@ -259,6 +265,8 @@ class CubeClockDraw implements IDrawable {
         this.renderer.render(this.scene,this.camera);
     }
     animation = () => {
+        //this.remove();
+
         var date = new Date();
         var hh = date.getHours() / 10 << 0;
         var hl = date.getHours() % 10 << 0;
@@ -279,8 +287,22 @@ class CubeClockDraw implements IDrawable {
 
         setTimeout(this.animation, this.time);
     }
-}
+    remove() {
+        if (this.arr.length == 0) {
+            this.arr = this.rmArr;
+            this.rmArr = new Array<THREE.Mesh>();
 
+        } else {
+            var remove = this.arr.pop();
+            this.rmArr.push(remove);
+            var area = 1000;
+            createjs.Tween.get(remove.position).wait(300).to({ 'x': Math.random() * area - area / 2, 'y': Math.random() * area - area / 2, 'z': Math.random() * area - area / 2 }, 5000, createjs.Ease.cubicInOut);
+        }
+    }
+    click() {
+        this.remove();
+    }
+}
 
 window.onload = () => {
     var target = document.querySelector("#viewport");
@@ -288,4 +310,6 @@ window.onload = () => {
 
     var ld = new LoopDrawing(cd, window, target);
     ld.draw();
+
+    window.onclick = () => ld.click();
 };
